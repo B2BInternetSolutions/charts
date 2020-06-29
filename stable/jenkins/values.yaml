@@ -7,7 +7,7 @@
 # See templates/_helpers.tpl
 # nameOverride:
 # fullnameOverride:
-# namespaceOverride:
+#namespaceOverride: jenkins
 
 # For FQDN resolving of the master service. Change this value to match your existing configuration.
 # ref: https://github.com/kubernetes/dns/blob/master/docs/specification.md
@@ -228,9 +228,13 @@ master:
     - kubernetes:1.25.7
     - workflow-job:2.39
     - workflow-aggregator:2.6
-    - credentials-binding:1.22
+    - credentials-binding:1.23
     - git:4.2.2
     - configuration-as-code:1.41
+    - github:1.30.0
+    - credentials:2.3.10
+    - plain-credentials:1.7
+    - kubernetes-cli:1.8.3
 
   # List of plugins to install in addition to those listed in master.installPlugins
   additionalPlugins: []
@@ -259,9 +263,42 @@ master:
   # master.key and hudson.util.Secret)
   # secretsFilesSecret: jenkins-secrets
   # Jenkins XML job configs to provision
-  jobs: {}
+  #jobs: {}
   #  test: |-
   #    <<xml here>>
+  jobs:
+    test-job: |-
+      <?xml version='1.0' encoding='UTF-8'?>
+      <project>
+        <keepDependencies>false</keepDependencies>
+        <properties/>
+        <scm class="hudson.scm.NullSCM"/>
+        <canRoam>false</canRoam>
+        <disabled>false</disabled>
+        <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+        <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+        <triggers/>
+        <concurrentBuild>false</concurrentBuild>
+        <builders/>
+        <publishers/>
+        <buildWrappers/>
+      </project>
+    test-job-2: |-
+      <?xml version='1.0' encoding='UTF-8'?>
+      <project>
+        <keepDependencies>false</keepDependencies>
+        <properties/>
+        <scm class="hudson.scm.NullSCM"/>
+        <canRoam>false</canRoam>
+        <disabled>false</disabled>
+        <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+        <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+        <triggers/>
+        <concurrentBuild>false</concurrentBuild>
+        <builders/>
+        <publishers/>
+        <buildWrappers/>
+
 
   # Below is the implementation of Jenkins Configuration as Code.  Add a key under configScripts for each configuration area,
   # where each corresponds to a plugin or section of the UI.  Each key (prior to | character) is just a label, and can be any value.
@@ -477,7 +514,10 @@ agent:
   # Allowed types are: ConfigMap, EmptyDir, HostPath, Nfs, PVC, Secret
   # Configure the attributes as they appear in the corresponding Java class for that type
   # https://github.com/jenkinsci/kubernetes-plugin/tree/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/volumes
-  volumes: []
+  # volumes: []
+  volumes: 
+   - type: EmptyDir
+     mountPath: /usr/local/sbin
   # - type: ConfigMap
   #   configMapName: myconfigmap
   #   mountPath: /var/myapp/myconfigmap
@@ -638,10 +678,10 @@ serviceAccount:
 
 serviceAccountAgent:
   # Specifies whether a ServiceAccount should be created
-  create: false
+  create: true
   # The name of the ServiceAccount to use.
   # If not set and create is true, a name is generated using the fullname template
-  name:
+  name: jenkins-deployer
   annotations: {}
 
 ## Backup cronjob configuration
